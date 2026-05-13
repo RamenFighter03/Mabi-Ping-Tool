@@ -1,0 +1,15 @@
+{
+  "name": "mabi-ping",
+  "version": "1.0.0",
+  "description": "Local latency monitor for Mabinogi Erinn server channels",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RamenFighter03/Mabi-Ping-Tool.git"
+  },
+  "author": "RamenFighter03",
+  "license": "MIT"
+}
