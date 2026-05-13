@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MabiPing</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23080c10'/><rect x='1' y='1' width='30' height='30' rx='6' fill='none' stroke='%2338bdf8' stroke-width='1.5' stroke-opacity='.4'/><circle cx='16' cy='16' r='5' fill='none' stroke='%2338bdf8' stroke-width='1.5'/><circle cx='16' cy='16' r='2' fill='%2338bdf8'/><circle cx='16' cy='16' r='9' fill='none' stroke='%2338bdf8' stroke-width='1' stroke-opacity='.25'/><circle cx='16' cy='16' r='13' fill='none' stroke='%2338bdf8' stroke-width='.75' stroke-opacity='.1'/></svg>">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080c10;--surface:#0e1318;--surface2:#131a22;--surface3:#1a2330;--border:#1e2d3d;--border2:#243447;--accent:#38bdf8;--accent-dim:rgba(56,189,248,.12);--green:#4ade80;--green-dim:rgba(74,222,128,.12);--amber:#fbbf24;--amber-dim:rgba(251,191,36,.12);--orange:#fb923c;--orange-dim:rgba(251,146,60,.12);--red:#f87171;--red-dim:rgba(248,113,113,.12);--muted:#334155;--muted2:#475569;--text:#94a3b8;--text2:#cbd5e1;--bright:#e2e8f0;--font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;--r:8px;--r2:12px}
+html,body{min-height:100%;background:var(--bg)}
+body{font-family:var(--font);color:var(--text);font-size:14px;line-height:1.5}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(56,189,248,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.03) 1px,transparent 1px);background-size:40px 40px}
+header{position:relative;z-index:1;padding:20px 40px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(56,189,248,.04) 0%,transparent 100%)}
+.logo-wrap,.hdr-right{display:flex;align-items:center;gap:14px}
+.logo-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,rgba(56,189,248,.2),rgba(56,189,248,.05));border:1px solid rgba(56,189,248,.3);display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo-text h1{font-size:18px;font-weight:700;letter-spacing:.05em;color:var(--bright)}.logo-text h1 span{color:var(--accent)}
+.logo-text small{font-family:var(--mono);font-size:10px;color:var(--muted2);letter-spacing:.12em;text-transform:uppercase}
+#last-upd,#countdown{font-family:var(--mono);font-size:11px;color:var(--muted2);background:var(--surface2);border:1px solid var(--border);padding:5px 10px;border-radius:6px}
+button{font-family:var(--font);cursor:pointer;border:none;border-radius:var(--r);transition:all .15s}
+#btn-ping{font-size:13px;font-weight:600;padding:8px 20px;background:var(--accent);color:#020c14;box-shadow:0 0 20px rgba(56,189,248,.3);position:relative;overflow:hidden}
+#btn-ping:hover{background:#7dd3fc;box-shadow:0 0 28px rgba(56,189,248,.45)}#btn-ping:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+#btn-ping.pinging::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);animation:sweep .8s infinite linear}
+@keyframes sweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}@keyframes pulse{0%,100%{opacity:.2}50%{opacity:.8}}
+main{position:relative;z-index:1;padding:28px 40px 60px;max-width:1200px;margin:0 auto}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:16px 20px;position:relative;overflow:hidden;transition:border-color .2s}.stat:hover{border-color:var(--border2)}
+.stat::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(56,189,248,.4),transparent)}
+.stat-v{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--bright);line-height:1;margin-bottom:6px}.stat-l{font-size:11px;font-weight:500;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em}
+.tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted2);padding:12px 16px;text-align:left;font-weight:400;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap}
+thead th.sortable{cursor:pointer;user-select:none}thead th.sortable:hover{color:var(--text2)}thead th.sort-asc::after{content:' ↑';color:var(--accent)}thead th.sort-desc::after{content:' ↓';color:var(--accent)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}tbody tr:last-child{border-bottom:none}tbody tr:hover{background:rgba(56,189,248,.03)}
+td{padding:11px 16px;vertical-align:middle}.ch-name{font-weight:600;font-size:14px;color:var(--bright)}.ch-ip{font-family:var(--mono);font-size:11px;color:var(--muted2)}.ch-port{font-family:var(--mono);font-size:12px;color:var(--text)}
+.ch-note{font-size:11px;color:var(--muted2);background:var(--surface3);border:1px solid var(--border);padding:2px 7px;border-radius:4px;display:inline-block}
+.ping-cell{display:flex;align-items:center;gap:8px;min-width:160px}.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}.ping-ms{font-family:var(--mono);font-size:13px;font-weight:600;min-width:60px;text-align:right}
+.ping-bar-bg{flex:1;height:4px;background:var(--surface3);border-radius:2px;overflow:hidden}.ping-bar{height:100%;border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1),background .4s}
+.sparkline{display:flex;align-items:flex-end;gap:2px;height:24px;min-width:80px}.spark-bar{width:5px;border-radius:2px 2px 0 0;transition:height .3s,background .3s;flex-shrink:0}
+.ok-low .dot{background:var(--green);box-shadow:0 0 6px var(--green)}.ok-mid .dot{background:var(--amber);box-shadow:0 0 6px var(--amber)}.ok-high .dot{background:var(--orange);box-shadow:0 0 6px var(--orange)}.offline .dot{background:var(--red)}.unknown .dot,.pending .dot{background:var(--muted)}
+.ok-low .ping-ms{color:var(--green)}.ok-mid .ping-ms{color:var(--amber)}.ok-high .ping-ms{color:var(--orange)}.offline .ping-ms{color:var(--red)}.unknown .ping-ms,.pending .ping-ms{color:var(--muted2)}
+.ok-low .ping-bar{background:var(--green)}.ok-mid .ping-bar{background:var(--amber)}.ok-high .ping-bar{background:var(--orange)}.offline .ping-bar{background:var(--red);width:100%!important}.unknown .ping-bar,.pending .ping-bar{background:var(--muted)}
+.pending .dot{animation:pulse 1.2s ease-in-out infinite}
+tbody tr.row-ok-low:hover{background:var(--green-dim)}tbody tr.row-ok-mid:hover{background:var(--amber-dim)}tbody tr.row-ok-high:hover{background:var(--orange-dim)}tbody tr.row-offline:hover{background:var(--red-dim)}
+#edit-panel{margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.edit-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted2);user-select:none;transition:color .15s}.edit-hdr:hover{color:var(--text2)}
+.edit-chevron{font-family:var(--mono);font-size:11px;transition:transform .2s}.edit-chevron.open{transform:rotate(180deg)}
+.edit-body{padding:16px;display:none;border-top:1px solid var(--border)}.edit-body.open{display:block}
+.edit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:8px}
+.edit-row{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:8px 12px}
+.edit-lbl{font-family:var(--mono);font-size:11px;color:var(--accent);min-width:56px;font-weight:600}
+input[type=text],input[type=number]{background:var(--surface3);border:1px solid var(--border2);border-radius:5px;color:var(--bright);font-family:var(--mono);font-size:12px;padding:5px 9px;outline:none;transition:border-color .15s,box-shadow .15s}
+input[type=text]{flex:1}input[type=number]{width:74px}input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(56,189,248,.15)}
+.edit-save{margin-top:12px;padding:8px 20px;font-size:12px;font-weight:600;background:var(--accent-dim);border:1px solid rgba(56,189,248,.35);color:var(--accent);border-radius:var(--r);transition:all .15s}.edit-save:hover{background:rgba(56,189,248,.2);border-color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo-wrap">
+    <div class="logo-icon">⚡</div>
+    <div class="logo-text"><h1>Mabi<span>Ping</span></h1><small>Erinn Server &mdash; Channel Latency Monitor</small></div>
+  </div>
+  <div class="hdr-right">
+    <span id="countdown"></span><span id="last-upd">Never pinged</span>
+    <button id="btn-ping">Ping All</button>
+  </div>
+</header>
+<main>
+  <div class="stats">
+    <div class="stat"><div class="stat-v" id="st-online">—</div><div class="stat-l">Online</div></div>
+    <div class="stat"><div class="stat-v" id="st-offline">—</div><div class="stat-l">Offline / Unknown</div></div>
+    <div class="stat"><div class="stat-v" id="st-best">—</div><div class="stat-l">Best Ping</div></div>
+    <div class="stat"><div class="stat-v" id="st-avg">—</div><div class="stat-l">Avg Ping</div></div>
+    <div class="stat"><div class="stat-v" id="st-worst">—</div><div class="stat-l">Worst Ping</div></div>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Channel</th><th>IP Address</th><th>Port</th><th class="sortable" id="th-latency">Latency</th><th>History</th><th>Note</th></tr></thead>
+    <tbody id="tbl-body"></tbody>
+  </table></div>
+  <div id="edit-panel">
+    <div class="edit-hdr" id="edit-toggle"><div>&#9998; Edit Channels</div><span class="edit-chevron" id="edit-chevron">&#9650;</span></div>
+    <div class="edit-body" id="edit-body">
+      <div class="edit-grid" id="edit-grid"></div>
+      <button class="edit-save" id="btn-save">&#128190; Save Changes</button>
+    </div>
+  </div>
+</main>
+<script>
+const HIST_MAX = 20, AUTO_SEC = 30;
+let channels = [], lastResults = [], history = {}, sortDir = null, cdTimer, autoTimer;
+
+const msClass = ms => ms == null ? "unknown" : ms < 80 ? "ok-low" : ms < 180 ? "ok-mid" : "ok-high";
+const barW    = ms => ms == null ? 0 : Math.min(100, Math.round(ms / 4));
+const msColor = ms => ms == null ? "var(--muted)" : ms < 80 ? "var(--green)" : ms < 180 ? "var(--amber)" : "var(--orange)";
+
+function spark(idx) {
+  const h = history[idx] || [];
+  if (!h.length) return '<div class="sparkline"></div>';
+  const max = Math.max(...h.map(v => v ?? 0), 1);
+  return `<div class="sparkline">${h.map(v => {
+    const ht = v == null ? 3 : Math.max(3, Math.round((v / max) * 24));
+    return `<div class="spark-bar" style="height:${ht}px;background:${msColor(v)};opacity:${v == null ? .25 : .8}"></div>`;
+  }).join("")}</div>`;
+}
+
+function renderTable(results) {
+  const sorted = sortDir ? [...results].sort((a,b) => {
+    const av = a.ms ?? Infinity, bv = b.ms ?? Infinity;
+    return sortDir === "asc" ? av - bv : bv - av;
+  }) : results;
+  document.getElementById("tbl-body").innerHTML = sorted.map(ch => {
+    const i = results.indexOf(ch), cls = ch.ip ? msClass(ch.ms) : "unknown";
+    const msStr = ch.ip ? (ch.ms != null ? ch.ms + " ms" : "OFFLINE") : "—";
+    return `<tr class="row-${cls}">
+      <td><span class="ch-name">${ch.name}</span></td>
+      <td><span class="ch-ip">${ch.ip || "<em style='color:var(--red)'>Not set</em>"}</span></td>
+      <td><span class="ch-port">${ch.port}</span></td>
+      <td><div class="ping-cell ${cls}"><div class="dot"></div><span class="ping-ms">${msStr}</span><div class="ping-bar-bg"><div class="ping-bar" style="width:${ch.ip ? barW(ch.ms) : 0}%"></div></div></div></td>
+      <td>${spark(i)}</td><td>${ch.note ? `<span class="ch-note">${ch.note}</span>` : ""}</td>
+    </tr>`;
+  }).join("");
+  const valid = results.filter(r => r.ip && r.ms != null);
+  const off   = results.filter(r => r.ip && r.ms == null).length + results.filter(r => !r.ip).length;
+  document.getElementById("st-online").textContent  = valid.length;
+  document.getElementById("st-offline").textContent = off;
+  document.getElementById("st-best").textContent    = valid.length ? Math.min(...valid.map(r=>r.ms)) + " ms" : "—";
+  document.getElementById("st-avg").textContent     = valid.length ? Math.round(valid.reduce((a,r)=>a+r.ms,0)/valid.length) + " ms" : "—";
+  document.getElementById("st-worst").textContent   = valid.length ? Math.max(...valid.map(r=>r.ms)) + " ms" : "—";
+}
+
+function renderPending() {
+  document.getElementById("tbl-body").innerHTML = channels.map((ch,i) => `<tr>
+    <td><span class="ch-name">${ch.name}</span></td>
+    <td><span class="ch-ip">${ch.ip || "<em style='color:var(--red)'>Not set</em>"}</span></td>
+    <td><span class="ch-port">${ch.port}</span></td>
+    <td><div class="ping-cell pending"><div class="dot"></div><span class="ping-ms">…</span><div class="ping-bar-bg"><div class="ping-bar" style="width:0%"></div></div></div></td>
+    <td>${spark(i)}</td><td></td>
+  </tr>`).join("");
+}
+
+function startCountdown() {
+  clearInterval(cdTimer); clearTimeout(autoTimer);
+  let cd = AUTO_SEC;
+  const el = document.getElementById("countdown");
+  el.textContent = `Next: ${cd}s`;
+  cdTimer   = setInterval(() => { el.textContent = `Next: ${--cd}s`; if (cd <= 0) clearInterval(cdTimer); }, 1000);
+  autoTimer = setTimeout(pingAll, AUTO_SEC * 1000);
+}
+
+async function pingAll() {
+  const btn = document.getElementById("btn-ping");
+  btn.disabled = true; btn.classList.add("pinging");
+  renderPending();
+  try {
+    const r = await fetch("/ping", { method:"POST" });
+    if (!r.ok) throw new Error("ping failed");
+    lastResults = await r.json();
+    lastResults.forEach((ch,i) => { (history[i] ??= []).push(ch.ms); if (history[i].length > HIST_MAX) history[i].shift(); });
+    renderTable(lastResults);
+    document.getElementById("last-upd").textContent = "Updated " + new Date().toLocaleTimeString();
+    startCountdown();
+  } catch(e) { console.error(e); document.getElementById("last-upd").textContent = "Ping failed"; }
+  btn.disabled = false; btn.classList.remove("pinging");
+}
+
+function buildEditGrid() {
+  document.getElementById("edit-grid").innerHTML = channels.map((ch,i) => `
+    <div class="edit-row"><span class="edit-lbl">${ch.name}</span>
+      <input type="text" data-i="${i}" data-f="ip" value="${ch.ip}" placeholder="IP address">
+      <input type="number" data-i="${i}" data-f="port" value="${ch.port}" min="1" max="65535">
+    </div>`).join("");
+}
+
+document.getElementById("th-latency").addEventListener("click", () => {
+  sortDir = sortDir === "asc" ? "desc" : "asc";
+  document.getElementById("th-latency").className = "sortable sort-" + sortDir;
+  if (lastResults.length) renderTable(lastResults);
+});
+document.getElementById("edit-toggle").addEventListener("click", () => {
+  document.getElementById("edit-body").classList.toggle("open");
+  document.getElementById("edit-chevron").classList.toggle("open");
+});
+document.getElementById("btn-save").addEventListener("click", async () => {
+  document.querySelectorAll("#edit-grid input").forEach(inp => {
+    const i = +inp.dataset.i, f = inp.dataset.f;
+    channels[i][f] = f === "port" ? +inp.value : inp.value.trim();
+  });
+  try {
+    const r = await fetch("/channels", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(channels) });
+    if (!r.ok) { console.error("Save failed"); return; }
+    buildEditGrid(); pingAll();
+  } catch(e) { console.error("Save error:", e); }
+});
+document.getElementById("btn-ping").addEventListener("click", pingAll);
+
+(async () => {
+  try {
+    const r = await fetch("/channels"); channels = await r.json();
+    renderTable(channels.map(ch => ({ ...ch, ms: undefined })));
+    buildEditGrid(); pingAll();
+  } catch(e) { console.error("Init error:", e); }
+})();
+</script>
+</body>
+</html>
