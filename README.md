@@ -7,6 +7,8 @@ A lightweight local latency monitor for **Mabinogi (Erinn server)** channels. Ru
 
 ---
 
+![MabiPing Dashboard](screenshots/preview.png)
+
 ## Features
 
 - **TCP ping** all 18 channels + Login + Housing simultaneously
