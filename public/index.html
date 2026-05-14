@@ -23,6 +23,12 @@ button{font-family:var(--font);cursor:pointer;border:none;border-radius:var(--r)
 #btn-ping.pinging::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);animation:sweep .8s infinite linear}
 @keyframes sweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}@keyframes pulse{0%,100%{opacity:.2}50%{opacity:.8}}
 main{position:relative;z-index:1;padding:28px 40px 60px;max-width:1200px;margin:0 auto}
+/* tabs */
+.tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:0}
+.tab{padding:8px 20px;font-size:13px;font-weight:600;color:var(--muted2);background:none;border:none;border-bottom:2px solid transparent;border-radius:0;cursor:pointer;transition:color .15s;margin-bottom:-1px}
+.tab:hover{color:var(--text2)}.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+/* ping tab */
 .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:16px 20px;position:relative;overflow:hidden;transition:border-color .2s}.stat:hover{border-color:var(--border2)}
 .stat::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(56,189,248,.4),transparent)}
@@ -52,43 +58,95 @@ tbody tr.row-ok-low:hover{background:var(--green-dim)}tbody tr.row-ok-mid:hover{
 input[type=text],input[type=number]{background:var(--surface3);border:1px solid var(--border2);border-radius:5px;color:var(--bright);font-family:var(--mono);font-size:12px;padding:5px 9px;outline:none;transition:border-color .15s,box-shadow .15s}
 input[type=text]{flex:1}input[type=number]{width:74px}input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(56,189,248,.15)}
 .edit-save{margin-top:12px;padding:8px 20px;font-size:12px;font-weight:600;background:var(--accent-dim);border:1px solid rgba(56,189,248,.35);color:var(--accent);border-radius:var(--r);transition:all .15s}.edit-save:hover{background:rgba(56,189,248,.2);border-color:var(--accent)}
+/* auction tab */
+.ah-search-row{display:flex;gap:8px;margin-bottom:20px}
+#ah-input{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);color:var(--bright);font-family:var(--font);font-size:14px;padding:9px 14px;outline:none;transition:border-color .15s,box-shadow .15s}
+#ah-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(56,189,248,.15)}
+#btn-ah{padding:9px 22px;font-size:13px;font-weight:600;background:var(--accent);color:#020c14;box-shadow:0 0 16px rgba(56,189,248,.25)}
+#btn-ah:hover{background:#7dd3fc}#btn-ah:disabled{opacity:.4;cursor:not-allowed}
+.ah-meta{font-family:var(--mono);font-size:11px;color:var(--muted2);margin-bottom:12px;min-height:16px}
+.ah-tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.ah-tbl-wrap table thead th{text-align:left}
+.ah-price{font-family:var(--mono);font-weight:600;color:var(--green)}
+.ah-type-auction{color:var(--amber)}
+.ah-owner{font-family:var(--mono);font-size:11px;color:var(--muted2)}
+.ah-end{font-family:var(--mono);font-size:11px;color:var(--muted2)}
+.ah-msg{padding:32px;text-align:center;color:var(--muted2);font-size:13px}
+.ah-pagination{display:flex;align-items:center;gap:10px;margin-top:12px;justify-content:flex-end}
+.ah-pagination button{padding:5px 14px;font-size:12px;background:var(--surface2);border:1px solid var(--border2);color:var(--text2)}
+.ah-pagination button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}.ah-pagination button:disabled{opacity:.3;cursor:not-allowed}
+.ah-pagination span{font-family:var(--mono);font-size:11px;color:var(--muted2)}
+.ah-ac-wrap{position:relative;flex:1}
+#ah-input{width:100%}
+.ah-ac-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);z-index:100;max-height:220px;overflow-y:auto;display:none}
+.ah-ac-drop.open{display:block}
+.ah-ac-item{padding:8px 14px;font-size:13px;color:var(--text2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ah-ac-item:hover,.ah-ac-item.active{background:var(--accent-dim);color:var(--accent)}
 </style>
 </head>
 <body>
 <header>
   <div class="logo-wrap">
     <div class="logo-icon">⚡</div>
-    <div class="logo-text"><h1>Mabi<span>Ping</span></h1><small>Erinn Server &mdash; Channel Latency Monitor</small></div>
+    <div class="logo-text"><h1>Mabi<span>Ping</span></h1><small>Erinn Server &mdash; NA Tools</small></div>
   </div>
-  <div class="hdr-right">
+  <div class="hdr-right" id="ping-hdr">
     <span id="countdown"></span><span id="last-upd">Never pinged</span>
     <button id="btn-ping">Ping All</button>
   </div>
 </header>
 <main>
-  <div class="stats">
-    <div class="stat"><div class="stat-v" id="st-online">—</div><div class="stat-l">Online</div></div>
-    <div class="stat"><div class="stat-v" id="st-offline">—</div><div class="stat-l">Offline / Unknown</div></div>
-    <div class="stat"><div class="stat-v" id="st-best">—</div><div class="stat-l">Best Ping</div></div>
-    <div class="stat"><div class="stat-v" id="st-avg">—</div><div class="stat-l">Avg Ping</div></div>
-    <div class="stat"><div class="stat-v" id="st-worst">—</div><div class="stat-l">Worst Ping</div></div>
+  <div class="tabs">
+    <button class="tab active" data-tab="ping">⚡ Ping</button>
+    <button class="tab" data-tab="ah">🏪 Auction House</button>
   </div>
-  <div class="tbl-wrap"><table>
-    <thead><tr><th>Channel</th><th>IP Address</th><th>Port</th><th class="sortable" id="th-latency">Latency</th><th>History</th><th>Note</th></tr></thead>
-    <tbody id="tbl-body"></tbody>
-  </table></div>
-  <div id="edit-panel">
-    <div class="edit-hdr" id="edit-toggle"><div>&#9998; Edit Channels</div><span class="edit-chevron" id="edit-chevron">&#9650;</span></div>
-    <div class="edit-body" id="edit-body">
-      <div class="edit-grid" id="edit-grid"></div>
-      <button class="edit-save" id="btn-save">&#128190; Save Changes</button>
+
+  <!-- PING TAB -->
+  <div class="tab-pane active" id="tab-ping">
+    <div class="stats">
+      <div class="stat"><div class="stat-v" id="st-online">—</div><div class="stat-l">Online</div></div>
+      <div class="stat"><div class="stat-v" id="st-offline">—</div><div class="stat-l">Offline / Unknown</div></div>
+      <div class="stat"><div class="stat-v" id="st-best">—</div><div class="stat-l">Best Ping</div></div>
+      <div class="stat"><div class="stat-v" id="st-avg">—</div><div class="stat-l">Avg Ping</div></div>
+      <div class="stat"><div class="stat-v" id="st-worst">—</div><div class="stat-l">Worst Ping</div></div>
     </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Channel</th><th>IP Address</th><th>Port</th><th class="sortable" id="th-latency">Latency</th><th>History</th><th>Note</th></tr></thead>
+      <tbody id="tbl-body"></tbody>
+    </table></div>
+    <div id="edit-panel">
+      <div class="edit-hdr" id="edit-toggle"><div>&#9998; Edit Channels</div><span class="edit-chevron" id="edit-chevron">&#9650;</span></div>
+      <div class="edit-body" id="edit-body">
+        <div class="edit-grid" id="edit-grid"></div>
+        <button class="edit-save" id="btn-save">&#128190; Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUCTION HOUSE TAB -->
+  <div class="tab-pane" id="tab-ah">
+    <div class="ah-search-row">
+      <div class="ah-ac-wrap"><input type="text" id="ah-input" placeholder="Search item name� (e.g. Hillwen Ore)" autocomplete="off"><div class="ah-ac-drop" id="ah-ac-drop"></div></div>
+      <button id="btn-ah">Search</button>
+    </div>
+    <div class="ah-meta" id="ah-meta"></div>
+    <div id="ah-results"></div>
   </div>
 </main>
 <script>
 const HIST_MAX = 20, AUTO_SEC = 30;
 let channels = [], lastResults = [], history = {}, sortDir = null, cdTimer, autoTimer;
+let ahPage = 0, ahLastQuery = "", ahTotal = 0;
 
+// ── Tab switching ──
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+  document.querySelectorAll(".tab,.tab-pane").forEach(el => el.classList.remove("active"));
+  t.classList.add("active");
+  document.getElementById("tab-" + t.dataset.tab).classList.add("active");
+  document.getElementById("ping-hdr").style.display = t.dataset.tab === "ping" ? "" : "none";
+}));
+
+// ── Ping tab ──
 const msClass = ms => ms == null ? "unknown" : ms < 80 ? "ok-low" : ms < 180 ? "ok-mid" : "ok-high";
 const barW    = ms => ms == null ? 0 : Math.min(100, Math.round(ms / 4));
 const msColor = ms => ms == null ? "var(--muted)" : ms < 80 ? "var(--green)" : ms < 180 ? "var(--amber)" : "var(--orange)";
@@ -193,6 +251,81 @@ document.getElementById("btn-save").addEventListener("click", async () => {
 });
 document.getElementById("btn-ping").addEventListener("click", pingAll);
 
+// ── Auction House tab ──
+const fmtPrice = p => p == null ? "—" : p.toLocaleString() + "g";
+const fmtDate  = d => { if (!d) return "—"; const dt = new Date(d); return `${dt.getMonth()+1}/${dt.getDate()} ${dt.getHours()}:${String(dt.getMinutes()).padStart(2,"0")}`; };
+
+async function ahSearch(query, page) {
+  const btn = document.getElementById("btn-ah"), meta = document.getElementById("ah-meta"), res = document.getElementById("ah-results");
+  btn.disabled = true; meta.textContent = "Searching…"; res.innerHTML = "";
+  try {
+    const r = await fetch(`/auction?item=${encodeURIComponent(query)}&page=${page}`);
+    if (!r.ok) { const t = await r.text(); throw new Error(t || r.status); }
+    const data = await r.json();
+    ahTotal = data.total; ahPage = page; ahLastQuery = query;
+    const pages = Math.ceil(ahTotal / 20);
+    meta.textContent = ahTotal ? `${ahTotal} listings — page ${page+1} of ${pages || 1}` : "No results found.";
+    if (!data.results.length) { res.innerHTML = ""; btn.disabled = false; return; }
+    res.innerHTML = `<div class="ah-tbl-wrap"><table>
+      <thead><tr><th>Item</th><th>Type</th><th>Price</th><th>Owner</th><th>Ends</th></tr></thead>
+      <tbody>${data.results.map(r => `<tr>
+        <td><span class="ch-name">${r.itemName}</span></td>
+        <td><span class="${r.type === "Auction" ? "ah-type-auction" : ""}" style="font-size:12px">${r.type}</span></td>
+        <td><span class="ah-price">${fmtPrice(r.price)}</span></td>
+        <td><span class="ah-owner">${r.owner || "—"}</span></td>
+        <td><span class="ah-end">${fmtDate(r.endDate)}</span></td>
+      </tr>`).join("")}</tbody>
+    </table></div>
+    <div class="ah-pagination">
+      <button id="ah-prev" ${page === 0 ? "disabled" : ""}>← Prev</button>
+      <span>Page ${page+1} / ${pages || 1}</span>
+      <button id="ah-next" ${page >= pages-1 ? "disabled" : ""}>Next →</button>
+    </div>`;
+    document.getElementById("ah-prev")?.addEventListener("click", () => ahSearch(ahLastQuery, ahPage - 1));
+    document.getElementById("ah-next")?.addEventListener("click", () => ahSearch(ahLastQuery, ahPage + 1));
+  } catch(e) { meta.textContent = "Error: " + e.message; console.error(e); }
+  btn.disabled = false;
+}
+
+let acTimer, acCache = {};
+function closeAc() { document.getElementById("ah-ac-drop").classList.remove("open"); }
+function showAc(items) {
+  const drop = document.getElementById("ah-ac-drop");
+  if (!items.length) { closeAc(); return; }
+  drop.innerHTML = items.map(n => `<div class="ah-ac-item">${n}</div>`).join("");
+  drop.querySelectorAll(".ah-ac-item").forEach(el => el.addEventListener("mousedown", e => {
+    e.preventDefault();
+    document.getElementById("ah-input").value = el.textContent;
+    closeAc(); ahSearch(el.textContent, 0);
+  }));
+  drop.classList.add("open");
+}
+document.getElementById("ah-input").addEventListener("input", e => {
+  const q = e.target.value.trim();
+  clearTimeout(acTimer);
+  if (q.length < 2) { closeAc(); return; }
+  acTimer = setTimeout(async () => {
+    if (acCache[q]) { showAc(acCache[q]); return; }
+    try {
+      const r = await fetch(`/auction?item=${encodeURIComponent(q)}&page=0`);
+      if (!r.ok) return;
+      const data = await r.json();
+      const names = [...new Set((data.results||[]).map(x => x.itemName))].slice(0, 10);
+      acCache[q] = names;
+      showAc(names);
+    } catch {}
+  }, 400);
+});
+document.addEventListener("click", e => { if (!e.target.closest(".ah-ac-wrap")) closeAc(); });
+document.getElementById("btn-ah").addEventListener("click", () => {
+  const q = document.getElementById("ah-input").value.trim();
+  if (q) ahSearch(q, 0);
+});
+document.getElementById("ah-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") { const q = e.target.value.trim(); if (q) ahSearch(q, 0); }
+});
+
+// ── Init ──
 (async () => {
   try {
     const r = await fetch("/channels"); channels = await r.json();
@@ -203,3 +336,10 @@ document.getElementById("btn-ping").addEventListener("click", pingAll);
 </script>
 </body>
 </html>
+
+
+
+
+
+
+

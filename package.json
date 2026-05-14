@@ -11,5 +11,8 @@
     "url": "https://github.com/RamenFighter03/Mabi-Ping-Tool.git"
   },
   "author": "RamenFighter03",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer-core": "^24.43.1"
+  }
 }
