@@ -11,7 +11,7 @@ A lightweight local latency monitor for **Mabinogi (Erinn server)** channels. Pi
 
 ## Features
 
-- **TCP ping** all 18 channels + Login + Housing simultaneously
+- **TCP ping** all 16 channels + Login + Housing simultaneously
 - **Live dashboard** — latency bar, color-coded status (green / amber / orange / offline)
 - **Auto-ping** every 30 seconds with live countdown
 - **Ping history sparklines** — last 20 pings per channel visualized inline
