@@ -1,5 +1,18 @@
 # Changelog
 
+## [2026-05-17]
+
+### Added
+- **Auction House tab** — search Mabinogi NA auction house (Mabius 6 server) by item name
+- `/auction` endpoint in `server.js` — uses Puppeteer to intercept the mabibase.com GraphQL response
+- Autocomplete dropdown on auction search input with client-side cache (debounced, 400 ms)
+- Pagination controls on auction results (20 listings per page)
+- Tab system — Ping and Auction House tabs; ping header controls hide when AH tab is active
+- `puppeteer-core` npm dependency (hardcoded Chrome headless shell path for local use)
+
+### Changed
+- Project now has an npm dependency (`puppeteer-core`) — "No npm dependencies" no longer applies
+
 ## [2026-05-13 19:35]
 
 ### Refactor

@@ -1,6 +1,6 @@
 # MabiPing
 
-A lightweight local latency monitor for **Mabinogi (Erinn server)** channels. Pings all channels simultaneously and shows live latency in your browser.
+A lightweight local latency monitor and auction house tool for **Mabinogi (Erinn server)**. Pings all channels simultaneously and lets you search the NA auction house — all from your browser.
 
 ![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat&logo=node.js&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=flat)
@@ -11,6 +11,7 @@ A lightweight local latency monitor for **Mabinogi (Erinn server)** channels. Pi
 
 ## Features
 
+### ⚡ Ping Tab
 - **TCP ping** all 16 channels + Login + Housing simultaneously
 - **Live dashboard** — latency bar, color-coded status (green / amber / orange / offline)
 - **Auto-ping** every 30 seconds with live countdown
@@ -18,7 +19,22 @@ A lightweight local latency monitor for **Mabinogi (Erinn server)** channels. Pi
 - **Sort by latency** — click the Latency column header to rank channels
 - **5 stat cards** — Online, Offline, Best, Avg, and Worst ping
 - **Editable channel list** — update IPs and ports directly in the browser, saved to `channels.json`
-- **No npm dependencies** — pure Node.js standard library
+
+### 🏪 Auction House Tab
+- **Search by item name** on the Mabius 6 server via [mabibase.com](https://na.mabibase.com)
+- **Autocomplete dropdown** — suggestions appear as you type (debounced, cached)
+- **Paginated results** — 20 listings per page with Prev / Next controls
+- Shows item name, type (Fixed / Auction), price, owner, and end date
+
+## How Auction House Search Works
+
+The AH feature uses **Puppeteer** to drive a headless Chrome instance rather than calling mabibase.com's API directly. When you search:
+
+1. The server launches headless Chrome and navigates to the mabibase.com search URL
+2. A network response listener watches for the GraphQL POST that mabibase's own frontend fires automatically
+3. Once captured, the response is parsed and returned as JSON — the browser is then closed
+
+This approach piggybacks on mabibase's existing page behavior instead of reverse-engineering the API, making it more resilient to auth or CORS changes. The tradeoff is that each search spawns a full browser instance (~2–5s per query).
 
 ## Setup
 
@@ -45,12 +61,19 @@ Or if you have Git:
 git clone https://github.com/RamenFighter03/Mabi-Ping-Tool.git
 ```
 
-### Step 3 — Run it
+### Step 3 — Install dependencies
 
-Open the folder, then open a Command Prompt inside it:
-- On Windows: hold **Shift** and right-click inside the folder, choose **"Open in Terminal"** or **"Open command window here"**
+Open a Command Prompt inside the folder and run:
+```
+npm install
+```
 
-Then type:
+This installs `puppeteer-core`, which is required for the Auction House feature.
+
+> **Note:** The auction house search uses a hardcoded Chrome headless shell path. If it doesn't work out of the box, run `npx puppeteer browsers install chrome-headless-shell` once to download it.
+
+### Step 4 — Run it
+
 ```
 node server.js
 ```
@@ -60,7 +83,7 @@ You should see:
 MabiPing running → http://localhost:7799
 ```
 
-### Step 4 — Open the dashboard
+### Step 5 — Open the dashboard
 
 Open your browser and go to **http://localhost:7799**
 
@@ -72,9 +95,9 @@ That's it. The tool will start pinging all channels automatically and refresh ev
 
 ```
 mabi-ping/
-├── server.js          # Node.js server (routes, TCP ping logic)
+├── server.js          # Node.js server (routes, TCP ping logic, AH scraper)
 ├── public/
-│   └── index.html     # Dashboard UI (HTML/CSS/JS)
+│   └── index.html     # Dashboard UI (HTML/CSS/JS) — Ping + Auction House tabs
 ├── channels.json      # Created on first save — stores custom IPs/ports
 └── package.json
 ```
